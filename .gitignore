@@ -1,0 +1,23 @@
+# OS generated files
+Thumbs.db
+.DS_Store
+
+# IntelliJ IDEA
+.idea/
+*.iml
+
+# Eclipse / Visual Studio Code
+.settings/
+.project
+.classpath
+.factorypath
+bin/
+
+# Maven binary directory
+target/
+
+# log files
+*.log
+
+# Ignore temp files
+temp.*
