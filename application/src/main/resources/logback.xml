@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<property name="service" value="backend"/>
+
+	<appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<!-- PATTERN: http://logback.qos.ch/manual/layouts.html#conversionWord -->
+			<pattern>%date %highlight(%-5level) [%logger{0}:%line][%mdc{sessionId}][%mdc{responseTime}] %message%n
+			</pattern>
+		</encoder>
+	</appender>
+
+	<appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<!-- daily rollover -->
+			<fileNamePattern>${service}-%d{yyyy-MM-dd}.log</fileNamePattern>
+
+			<!-- keep 30 days' worth of history capped at 3GB total size -->
+			<maxHistory>30</maxHistory>
+			<totalSizeCap>3GB</totalSizeCap>
+		</rollingPolicy>
+
+		<encoder>
+			<!-- PATTERN: http://logback.qos.ch/manual/layouts.html#conversionWord -->
+			<pattern>%date %-5level [%logger{0}:%line][%mdc{sessionId}][%mdc{responseTime}] %message%n</pattern>
+		</encoder>
+	</appender>
+
+	<appender name="async" class="ch.qos.logback.classic.AsyncAppender">
+		<appender-ref ref="file"/>
+	</appender>
+
+	<appender name="logstash" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+		<destination>localhost:5000</destination>
+		<encoder class="net.logstash.logback.encoder.LogstashEncoder">
+			<includeMdcKeyName>sessionId</includeMdcKeyName>
+			<includeMdcKeyName>responseTime</includeMdcKeyName>
+			<customFields>
+				{
+				"dtap":"${spring.profiles.active}",
+				"service":"${service}"
+				}
+			</customFields>
+		</encoder>
+	</appender>
+
+	<springProfile name="lcl">
+		<logger name="org.springframework" level="info"/>
+		<logger name="org.springframework.transaction.interceptor" level="trace"/>
+		<logger name="logging.level.org.springframework.aop.interceptor" level="trace"/>
+
+		<logger name="org.hibernate" level="info"/>
+		<logger name="com.github.syntext.rrserver" level="trace"/>
+
+		<root level="warn">
+			<appender-ref ref="stdout"/>
+		</root>
+	</springProfile>
+
+</configuration>

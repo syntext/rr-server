@@ -10,7 +10,7 @@
 		<artifactId>parent</artifactId>
 		<version>local-SNAPSHOT</version>
 	</parent>
-	<artifactId>web</artifactId>
+	<artifactId>web-api</artifactId>
 
 	<dependencies>
 		<dependency>

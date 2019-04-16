@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="rr-server | macOs" basedir=".">
+	<property environment="env"/>
+	<property file="build.properties"/>
+	<property name="environment.home" value="${env.HOME}/Environment"/>
+
+	<!-- ==[ PostgreSQL ]=========================================================================================== -->
+	<target name="postgresql.install" description="(Re)Install PostgreSQL database server">
+
+		<!-- Are you sure! -->
+		<input message="Are you sure you want to (re)install PostgreSQL [${postgresql.version}] (y/n)?" validargs="n,y"
+			   addproperty="do.rollout"/>
+		<condition property="do.abort">
+			<equals arg1="n" arg2="${do.rollout}"/>
+		</condition>
+		<fail if="do.abort">Rollout aborted.</fail>
+
+		<antcall target="postgresql.kill"/>
+
+		<!-- Cleanup old postgresql installation -->
+		<delete dir="${environment.home}/pgsql"/>
+
+		<!-- download binairies -->
+		<!-- See: https://www.enterprisedb.com/download-postgresql-binaries -->
+		<get src="http://get.enterprisedb.com/postgresql/postgresql-${postgresql.version}-osx-binaries.zip"
+			 dest="${environment.home}" verbose="false" usetimestamp="true"/>
+
+		<!-- unpack postgresql -->
+		<unzip src="${environment.home}/postgresql-${postgresql.version}-osx-binaries.zip" dest="${environment.home}"/>
+
+		<!-- make executable -->
+		<exec dir="${environment.home}/pgsql" executable="/bin/sh">
+			<arg value="-c"/>
+			<arg value="chmod 755 ./bin/*"/>
+		</exec>
+
+		<!-- create database -->
+		<exec dir="${environment.home}/pgsql/bin" executable="/bin/sh">
+			<arg value="-c"/>
+			<arg value="./initdb -D ${environment.home}/pgsql/data -E UTF8"/>
+		</exec>
+
+		<!-- start database -->
+		<antcall target="postgresql.start"/>
+		<sleep seconds="3"/>
+
+		<!-- import database schema -->
+		<echo message="Start PostgreSQL import"/>
+		<exec dir="${environment.home}/pgsql/bin" executable="/bin/sh">
+			<arg value="-c"/>
+			<arg value="./psql -d postgres -a -f ${basedir}/database/setup.sql"/>
+		</exec>
+	</target>
+
+	<target name="postgresql.kill" description="Kill all PostgreSQL processes">
+		<exec dir="${basedir}" executable="/bin/sh" spawn="true">
+			<arg value="-c"/>
+			<arg value="killall postgres"/>
+		</exec>
+		<sleep seconds="3"/>
+	</target>
+
+	<target name="postgresql.start" description="Start PostgreSQL database">
+		<exec dir="${environment.home}/pgsql/bin" executable="/bin/sh">
+			<arg value="-c"/>
+			<arg value="./pg_ctl start -D ${environment.home}/pgsql/data -l ${environment.home}/pgsql/pgsql.log"/>
+		</exec>
+	</target>
+
+	<target name="postgresql.stop" description="Stop PostgreSQL database">
+		<exec dir="${environment.home}/pgsql/bin" executable="/bin/sh">
+			<arg value="-c"/>
+			<arg value="./pg_ctl stop -D ${environment.home}/pgsql/data"/>
+		</exec>
+	</target>
+
+	<target name="postgresql.dump" description="Dump PostgreSQL database">
+		<!-- Are you sure! -->
+		<input message="Are you sure you want to (re)install PostgreSQL dump file (y/n)?" validargs="n,y"
+			   addproperty="do.rollout"/>
+		<condition property="do.abort">
+			<equals arg1="n" arg2="${do.rollout}"/>
+		</condition>
+		<fail if="do.abort">Rollout aborted.</fail>
+
+		<exec dir="${environment.home}/pgsql/bin" executable="/bin/sh">
+			<arg value="-c"/>
+			<arg value="./pg_dump ${postgresql.database} | 7z a -si -v10m ${basedir}/database/dump/${postgresql.database}.7z"/>
+		</exec>
+	</target>
+
+	<target name="postgresql.dump.data" description="Dump data PostgreSQL database">
+		<!-- Are you sure! -->
+		<input message="Are you sure you want to (re)install PostgreSQL dump file (y/n)?" validargs="n,y"
+			   addproperty="do.rollout"/>
+		<condition property="do.abort">
+			<equals arg1="n" arg2="${do.rollout}"/>
+		</condition>
+		<fail if="do.abort">Rollout aborted.</fail>
+
+		<exec dir="${environment.home}/pgsql/bin" executable="/bin/sh">
+			<arg value="-c"/>
+			<arg
+				value="./pg_dump --data-only ${postgresql.database} | 7z a -si -v10m ${basedir}/database/dump/${postgresql.database}-data-only.7z"/>
+		</exec>
+	</target>
+
+	<target name="postgresql.restore" description="Restore PostgreSQL database">
+		<exec dir="${environment.home}/pgsql/bin" executable="/bin/sh">
+			<arg value="-c"/>
+			<arg value="7z e -so ${basedir}/database/dump/${postgresql.database}.7z.001 | ./psql ${postgresql.database}"/>
+		</exec>
+	</target>
+
+	<target name="postgresql.restore.backup" description="Restore PostgreSQL database">
+		<exec dir="${environment.home}/pgsql/bin" executable="/bin/sh">
+			<arg value="-c"/>
+			<arg value="7z e -so ${basedir}/database/dump/*.7z | ./psql ${postgresql.database}"/>
+		</exec>
+	</target>
+
+	<target name="postgresql.restore.data" description="Restore PostgreSQL database">
+		<exec dir="${environment.home}/pgsql/bin" executable="/bin/sh">
+			<arg value="-c"/>
+			<arg
+				value="7z e -so ${basedir}/database/dump/${postgresql.database}-data-only.7z.001 | ./psql ${postgresql.database}"/>
+		</exec>
+	</target>
+
+	<!-- ==[ LIQUIBASE ]============================================================================================ -->
+	<target name="liquibase.install" description="Update database">
+		<!-- Are you sure! -->
+		<input message="Are you sure you want to rollout Liquibase ${liquibase.version} (N/y)?" validargs="n,y"
+			   addproperty="do.rollout"/>
+		<condition property="do.abort">
+			<equals arg1="n" arg2="${do.rollout}"/>
+		</condition>
+		<fail if="do.abort">Rollout aborted.</fail>
+
+		<!-- cleanup old installation -->
+		<delete dir="${environment.home}/liquibase"/>
+
+		<!-- rollout binairies -->
+		<mkdir dir="${environment.home}/liquibase"/>
+
+		<!-- rollout binairies -->
+		<get
+			src="https://repo1.maven.org/maven2/org/liquibase/liquibase-core/${liquibase.version}/liquibase-core-${liquibase.version}.jar"
+			dest="${environment.home}/liquibase" verbose="false" usetimestamp="true"/>
+		<get
+			src="https://repo1.maven.org/maven2/org/postgresql/postgresql/${postgresql.driver.version}/postgresql-${postgresql.driver.version}.jar"
+			dest="${environment.home}/liquibase" verbose="false" usetimestamp="true"/>
+	</target>
+
+	<target name="liquibase">
+		<java jar="${environment.home}/liquibase/liquibase-core-${liquibase.version}.jar" fork="true" failonerror="true">
+			<arg value="--classpath=${environment.home}/liquibase/postgresql-${postgresql.driver.version}.jar"/>
+			<arg value="--driver=org.postgresql.Driver"/>
+			<arg value="--changeLogFile=${basedir}/database/changelog/db.changelog-master.xml"/>
+			<arg value="--url=${postgresql.url}"/>
+			<arg value="--username=${postgresql.username}"/>
+			<arg value="--password=${postgresql.database}"/>
+			<arg value="${command}"/>
+		</java>
+	</target>
+
+	<target name="liquibase.update" description="Update database">
+		<antcall target="liquibase">
+			<param name="command" value="update"/>
+		</antcall>
+	</target>
+
+	<target name="liquibase.drop" description="Drop database">
+		<antcall target="liquibase">
+			<param name="command" value="dropAll"/>
+		</antcall>
+	</target>
+
+	<target name="liquibase.changelogSync" description="Sync ChangeLog database">
+		<antcall target="liquibase">
+			<param name="command" value="changelogSync"/>
+		</antcall>
+	</target>
+
+	<target name="liquibase.status" description="Status ChangeLog database">
+		<antcall target="liquibase">
+			<param name="command" value="status"/>
+		</antcall>
+	</target>
+
+	<target name="liquibase.recreate" description="Recreate database" depends="liquibase.drop, liquibase.update"/>
+
+	<target name="liquibase.validate" description="Validate database">
+		<antcall target="liquibase">
+			<param name="command" value="validate"/>
+		</antcall>
+	</target>
+
+	<target name="liquibase.dump" description="Store data in an liquibase xml file">
+		<java jar="${environment.home}/liquibase/liquibase-core-${liquibase.version}.jar" fork="true" failonerror="true">
+			<arg value="--classpath=${environment.home}/liquibase/postgresql-${postgresql.driver.version}.jar"/>
+			<arg value="--driver=org.postgresql.Driver"/>
+			<arg value="--changeLogFile=${basedir}/database/changelog/generateChangeLog.xml"/>
+			<arg value="--url=${postgresql.url}"/>
+			<arg value="--username=${postgresql.username}"/>
+			<arg value="--password=${postgresql.database}"/>
+			<arg value="--diffTypes=data"/>
+			<arg value="generateChangeLog"/>
+		</java>
+	</target>
+
+	<!-- ==[ Kill ]================================================================================================= -->
+	<target name="chrome.kill" description="kill all java processes">
+		<exec dir="${basedir}" executable="/bin/sh" spawn="true">
+			<arg value="-c"/>
+			<arg value="ps aux | grep Chrome | awk '{ print $2 }' | xargs kill -9 "/>
+		</exec>
+	</target>
+
+	<target name="java.kill" description="kill all java processes">
+		<exec dir="${basedir}" executable="/bin/sh" spawn="true">
+			<arg value="-c"/>
+			<arg value="ps aux | grep java | awk '{ print $2 }' | xargs kill -9 "/>
+		</exec>
+	</target>
+
+	<!-- ==[ FakeSMTP ]============================================================================================= -->
+	<target name="smtp.install" description="Setup a fake SMTP server">
+
+		<!-- Are you sure! -->
+		<input message="Are you sure you want to rollout fake STMP server (N/y)?" validargs="n,y"
+			   addproperty="do.rollout"/>
+		<condition property="do.abort">
+			<equals arg1="n" arg2="${do.rollout}"/>
+		</condition>
+		<fail if="do.abort">Rollout aborted.</fail>
+
+		<!-- cleanup old installation -->
+		<delete dir="${environment.home}/fakesmtp"/>
+
+		<!-- rollout binairies -->
+		<mkdir dir="${environment.home}/fakesmtp"/>
+		<get
+			src="http://repo1.maven.org/maven2/com/github/tntim96/fakesmtp/${fakesmtp.version}/fakesmtp-${fakesmtp.version}.jar"
+			dest="${environment.home}/fakesmtp" verbose="false" usetimestamp="true"/>
+	</target>
+
+	<target name="smtp.start" description="Start fake SMTP server">
+		<delete dir="${environment.home}/fakesmtp/emails"/>
+		<mkdir dir="${environment.home}/fakesmtp/emails"/>
+
+		<exec dir="${environment.home}/fakesmtp" executable="/bin/sh" spawn="true">
+			<arg value="-c"/>
+			<arg
+				value="java -jar ${environment.home}/fakesmtp/fakesmtp-${fakesmtp.version}.jar -s -p ${fakesmtp.port} -o ${environment.home}/fakesmtp/emails"/>
+		</exec>
+	</target>
+
+</project>

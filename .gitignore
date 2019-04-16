@@ -21,3 +21,12 @@ target/
 
 # Ignore temp files
 temp.*
+
+# Database backups
+database/dump/*.7z
+
+# Liquibase
+database/changelog/generateChangeLog.xml
+
+# Enviroments tools
+lib/

@@ -29,7 +29,8 @@
 	<modules>
 		<module>repository</module>
 		<module>service</module>
-		<module>web</module>
+		<module>web-api</module>
+		<module>web-console</module>
 		<module>application</module>
 	</modules>
 
