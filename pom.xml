@@ -65,6 +65,12 @@
 				<version>1.76.0</version>
 			</dependency>
 
+			<dependency>
+				<groupId>io.github.microutils</groupId>
+				<artifactId>kotlin-logging</artifactId>
+				<version>1.6.24</version>
+			</dependency>
+
 			<!-- JWT -->
 			<dependency>
 				<groupId>io.jsonwebtoken</groupId>
