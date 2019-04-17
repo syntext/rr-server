@@ -4,6 +4,43 @@
 				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
 
 	<changeSet id="data-1" author="Ron Lievens">
+
+		<insert tableName="users">
+			<column name="id" value="8eba47b6-04a2-4a07-9d2e-b7c19f41b17e"/>
+			<column name="first_name" value="John"/>
+			<column name="last_name" value="Roe"/>
+			<column name="language_code" value="en_EN"/>
+			<column name="email" value="john.roe@example.com"/>
+			<column name="password" value="DO PASSWORD RESET!"/>
+			<column name="date_of_birth" value="1966-07-08 00:00:00"/>
+			<column name="gender" value="MALE"/>
+			<column name="created_on" value="2019-01-01 00:00:00"/>
+		</insert>
+		<insert tableName="user_roles">
+			<column name="user_id" value="8eba47b6-04a2-4a07-9d2e-b7c19f41b17e"/>
+			<column name="authority" value="ROLE_VERIFIED"/>
+		</insert>
+
+		<insert tableName="users">
+			<column name="id" value="95830e84-2432-4b3d-af37-1bfd0457d9d7"/>
+			<column name="first_name" value="Jane"/>
+			<column name="last_name" value="Roe"/>
+			<column name="language_code" value="en_EN"/>
+			<column name="email" value="jane.roe@example.com"/>
+			<column name="password" value="DO PASSWORD RESET!"/>
+			<column name="date_of_birth" value="1977-08-07 00:00:00"/>
+			<column name="gender" value="FEMALE"/>
+			<column name="created_on" value="2019-01-01 00:00:00"/>
+		</insert>
+		<insert tableName="user_roles">
+			<column name="user_id" value="95830e84-2432-4b3d-af37-1bfd0457d9d7"/>
+			<column name="authority" value="ROLE_VERIFIED"/>
+		</insert>
+		<insert tableName="user_roles">
+			<column name="user_id" value="95830e84-2432-4b3d-af37-1bfd0457d9d7"/>
+			<column name="authority" value="ROLE_ADMINISTRATOR"/>
+		</insert>
+
 	</changeSet>
 
 </databaseChangeLog>
