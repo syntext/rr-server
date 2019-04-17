@@ -23,7 +23,7 @@ data class User(
 	@Column(nullable = false)
 	var password: String,
 	@Column(nullable = false)
-	var email: String?,
+	var email: String,
 	var languageCode: Locale,
 
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
