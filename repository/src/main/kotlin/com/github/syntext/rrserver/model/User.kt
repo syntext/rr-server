@@ -14,33 +14,33 @@ import javax.persistence.FetchType.EAGER
 @Table(name = "USERS")
 data class User(
 	@Id
-	val id: UUID = UUID.randomUUID(),
+	var id: UUID,
 	@Column(nullable = false)
-	val firstName: String = "",
-	val infix: String? = null,
+	var firstName: String,
+	var infix: String? = null,
 	@Column(nullable = false)
-	val lastName: String = "",
+	var lastName: String,
 	@Column(nullable = false)
-	val password: String? = null,
+	var password: String,
 	@Column(nullable = false)
-	val email: String? = null,
-	val languageCode: Locale = Locale.ENGLISH,
+	var email: String?,
+	var languageCode: Locale,
 
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
-	val dateOfBirth: LocalDate? = null,
+	var dateOfBirth: LocalDate?,
 
 	@Enumerated(value = STRING)
-	val gender: GenderType = GenderType.FEMALE,
+	var gender: GenderType,
 
 	@Column(insertable = false, updatable = false)
-	val createdOn: ZonedDateTime = ZonedDateTime.now(),
+	var createdOn: ZonedDateTime,
 	@Column(insertable = false)
-	val lastModified: ZonedDateTime = ZonedDateTime.now(),
-	val disabledOn: ZonedDateTime? = null,
+	var lastModified: ZonedDateTime,
+	var disabledOn: ZonedDateTime?,
 
 	@ElementCollection(fetch = EAGER)
 	@CollectionTable(name = "MEMBER_ROLES", joinColumns = [JoinColumn(name = "MEMBER_ID")])
 	@Column(name = "AUTHORITY")
 	@Enumerated(STRING)
-	val roles: Set<UserRoleType> = HashSet()
+	var roles: Set<UserRoleType>
 )
