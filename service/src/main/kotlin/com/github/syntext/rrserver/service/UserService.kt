@@ -18,7 +18,6 @@ class UserService(private val userRepository: UserRepository) {
 	private var log = LoggerFactory.getLogger(UserService::class.java)
 
 	private val BCRYPT_PREFIX = "{bcrypt}"
-	private val VALID_LIMIT_HOURS = -24
 
 	// --[ LIST ]-------------------------------------------------------------------------------------------------------
 	@Transactional(readOnly = true)
@@ -68,20 +67,25 @@ class UserService(private val userRepository: UserRepository) {
 	// --[ UPDATE ]-----------------------------------------------------------------------------------------------------
 	@Transactional
 	fun update(model: User): Boolean {
-		val user = userRepository.findById(model.id)
-		model.roles = user.roles
-		model.lastModified = ZonedDateTime.now()
-		userRepository.saveAndFlush(model)
-		return true
+		val user = userRepository.findByIdOrNull(model.id)
+
+		if (user != null) {
+			model.roles = user.roles
+			model.lastModified = ZonedDateTime.now()
+			userRepository.saveAndFlush(model)
+			return true
+		}
+
+		return false
 	}
 
 	@Transactional
-	fun updatePassword(memberId: UUID, newPassword: String): Boolean {
-		var user = userRepository.findByIdOrNull(memberId)
+	fun updatePassword(userId: UUID, newPassword: String): Boolean {
+		val user = userRepository.findByIdOrNull(userId)
 		user?.let {
-			user.password = encryptPassword(newPassword)
-			user.roles = user.roles
-			user.lastModified = ZonedDateTime.now()
+			it.password = encryptPassword(newPassword)
+			it.roles = user.roles
+			it.lastModified = ZonedDateTime.now()
 			userRepository.saveAndFlush(user)
 			return true
 		}
@@ -90,8 +94,8 @@ class UserService(private val userRepository: UserRepository) {
 
 	// --[ DELETE ]-----------------------------------------------------------------------------------------------------
 	@Transactional
-	fun deactivate(memberId: UUID, since: ZonedDateTime) {
-		val user = userRepository.findByIdOrNull(memberId)
+	fun deactivate(userId: UUID, since: ZonedDateTime) {
+		val user = userRepository.findByIdOrNull(userId)
 		user?.let {
 			user.disabledOn = since
 			userRepository.saveAndFlush(user)
@@ -99,11 +103,11 @@ class UserService(private val userRepository: UserRepository) {
 	}
 
 	@Transactional
-	fun activate(brandId: UUID, memberId: UUID) {
-		val user = userRepository.findByIdOrNull(memberId)
+	fun activate(brandId: UUID, userId: UUID) {
+		val user = userRepository.findByIdOrNull(userId)
 		user?.let {
-			user.disabledOn = null
-			userRepository.saveAndFlush(user)
+			it.disabledOn = null
+			userRepository.saveAndFlush(it)
 		}
 	}
 
@@ -114,21 +118,13 @@ class UserService(private val userRepository: UserRepository) {
 
 	// ==[ ROLE ]=======================================================================================================
 	@Transactional
-	fun grant(memberId: UUID, role: UserRoleType) {
-		val user = userRepository.findByIdOrNull(memberId)
-		user?.let {
-			user.roles.add(role)
-			userRepository.saveAndFlush(user)
-		}
+	fun grant(userId: UUID, role: UserRoleType) {
+		userRepository.grand(userId, role)
 	}
 
 	@Transactional
-	fun revoke(memberId: UUID, role: UserRoleType) {
-		val user = userRepository.findByIdOrNull(memberId)
-		user?.let {
-			user.roles.remove(role)
-			userRepository.saveAndFlush(user)
-		}
+	fun revoke(userId: UUID, role: UserRoleType) {
+		userRepository.revoke(userId, role)
 	}
 
 	// --[ LOGIC ]------------------------------------------------------------------------------------------------------
