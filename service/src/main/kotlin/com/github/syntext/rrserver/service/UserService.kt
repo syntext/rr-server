@@ -22,7 +22,7 @@ class UserService(private val userRepository: UserRepository) {
 	@Transactional(readOnly = true)
 	fun list(withHistory: Boolean): Set<User> {
 		val now = ZonedDateTime.now()
-		val result = HashSet<User>()
+		val result = mutableListOf<User>()
 		result.addAll(userRepository.findByDisabledOnIsNullOrDisabledOnGreaterThanOrderByCreatedOnDesc(now))
 		if (withHistory) {
 			result.addAll(userRepository.findByDisabledOnLessThanEqualOrderByCreatedOnDesc(now))
@@ -43,17 +43,16 @@ class UserService(private val userRepository: UserRepository) {
 
 	// --[ READ ]-------------------------------------------------------------------------------------------------------
 	@Transactional(readOnly = true)
-	fun available(email: String): Boolean = !userRepository.existsByEmail(email)
+	fun available(email: String) = !userRepository.existsByEmail(email)
 
 	@Transactional(readOnly = true)
-	fun read(email: String): User? = userRepository.findByEmail(email)
+	fun read(email: String) = userRepository.findByEmail(email)
 
 	@Transactional(readOnly = true)
-	fun read(id: UUID): User? = userRepository.findByIdOrNull(id)
+	fun read(id: UUID) = userRepository.findByIdOrNull(id)
 
 	@Transactional(readOnly = true)
-	fun available(email: String, id: UUID): Boolean = userRepository.existsByEmailAndId(email, id)
-
+	fun available(email: String, id: UUID) = userRepository.existsByEmailAndId(email, id)
 
 	// --[ UPDATE ]-----------------------------------------------------------------------------------------------------
 	@Transactional
@@ -108,5 +107,5 @@ class UserService(private val userRepository: UserRepository) {
 	fun revoke(userId: UUID, role: UserRoleType) = userRepository.revoke(userId, role)
 
 	// --[ LOGIC ]------------------------------------------------------------------------------------------------------
-	fun hashPassword(password: String): String = BCRYPT_PREFIX + BCryptPasswordEncoder().encode(password)
+	fun hashPassword(password: String) = BCRYPT_PREFIX + BCryptPasswordEncoder().encode(password)
 }

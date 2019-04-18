@@ -20,18 +20,18 @@ import javax.crypto.SecretKey
 import javax.servlet.http.HttpServletRequest
 import kotlin.collections.ArrayList
 
+private const val CLAIM_KEY = "auth"
+private const val HTTP_AUTHENTICATION_HEADER = "Authorization"
+private const val HTTP_AUTHENTICATION_SCHEME = "Bearer "
+private const val HTTP_AUTHENTICATION_SCHEME_LENGTH = HTTP_AUTHENTICATION_SCHEME.length
 
 @Service
-class JwtTokenService(val userRepository: UserRepository,
-					  val passwordEncoder: PasswordEncoder,
-					  @Value("#{jwt.secret.key}") val secretKeyString: String) {
-
-
-	private val CLAIM_KEY: String = "auth"
-	private val HTTP_AUTHENTICATION_HEADER: String = "Authorization"
-	private val HTTP_AUTHENTICATION_SCHEME: String = "Bearer "
-	private val HTTP_AUTHENTICATION_SCHEME_LENGTH: Int = HTTP_AUTHENTICATION_SCHEME.length
-	private val secretKey: SecretKey = Keys.hmacShaKeyFor(secretKeyString.toByteArray())
+class JwtTokenService(
+	val userRepository: UserRepository,
+	val passwordEncoder: PasswordEncoder,
+	@Value("#{jwt.secret.key}") val secretKeyString: String
+) {
+	private val secretKey = Keys.hmacShaKeyFor(secretKeyString.toByteArray())
 
 	fun doRefresh(): String? {
 		// TODO: implement me!
@@ -53,9 +53,7 @@ class JwtTokenService(val userRepository: UserRepository,
 		}
 	}
 
-	fun getAuthentication(username: UUID): Authentication {
-		return getAuthentication(userRepository.findByIdOrNull(username))
-	}
+	fun getAuthentication(username: UUID): Authentication = getAuthentication(userRepository.findByIdOrNull(username))
 
 	fun getAuthentication(token: String): Authentication {
 		val username = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).body.subject
@@ -63,12 +61,13 @@ class JwtTokenService(val userRepository: UserRepository,
 	}
 
 	fun getAuthentication(user: User?): Authentication {
-		if (user == null) {
-			throw UnauthorizedException("Member not found!")
+		when (user) {
+			null -> throw UnauthorizedException("Member not found!")
+			else -> return UsernamePasswordAuthenticationToken(user.id, "", user.roles)
 		}
-		return UsernamePasswordAuthenticationToken(user.id, "", user.roles)
 	}
 
+	// fixme: don't do null return types
 	fun resolveToken(req: HttpServletRequest): String? {
 		val bearerToken = req.getHeader(HTTP_AUTHENTICATION_HEADER)
 		return if (bearerToken.isNotBlank() && bearerToken.startsWith(HTTP_AUTHENTICATION_SCHEME)) {
@@ -76,21 +75,22 @@ class JwtTokenService(val userRepository: UserRepository,
 		} else null
 	}
 
-	fun validateToken(token: String): Boolean {
+	fun validateToken(token: String) {
 		try {
 			Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token)
-			return true
-		} catch (e: JwtException) {
-			throw UnauthorizedException("Expired or invalid JWT token")
-		} catch (e: IllegalArgumentException) {
-			throw UnauthorizedException("Expired or invalid JWT token")
+		} catch (e: Throwable) {
+			when (e) {
+				is java.lang.IllegalArgumentException,
+				is JwtException -> {
+					throw UnauthorizedException("Expired or invalid JWT token")
+				}
+				else -> throw e
+			}
 		}
-
 	}
 
 	// --[ LOGIC ]------------------------------------------------------------------------------------------------------
 	private fun createToken(username: String, roles: List<UserRoleType>): String {
-
 		val roleList = mutableListOf<String>()
 		for (role in roles) {
 			roleList.add(role.authority)
