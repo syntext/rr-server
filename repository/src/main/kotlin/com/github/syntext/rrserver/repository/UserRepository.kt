@@ -29,7 +29,10 @@ interface UserRepository : JpaRepository<User, UUID> {
 
 	@Transactional
 	@Modifying(clearAutomatically = true)
-	@Query(nativeQuery = true, value = "INSERT INTO user_roles (user_id,authority) VALUES (:userId,:role)")
+	@Query(
+		nativeQuery = true,
+		value = "INSERT INTO user_roles (user_id,authority) VALUES (:userId,:role) ON CONFLICT (user_id,authority) DO NOTHING"
+	)
 	fun grand(@Param("userId") userId: UUID, @Param("role") role: UserRoleType)
 
 	@Transactional

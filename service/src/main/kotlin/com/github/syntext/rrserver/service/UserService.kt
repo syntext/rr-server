@@ -12,19 +12,18 @@ import org.springframework.transaction.annotation.Transactional
 import java.time.ZonedDateTime
 import java.util.*
 
+private const val BCRYPT_PREFIX = "{bcrypt}"
 
 @Service
 class UserService(private val userRepository: UserRepository) {
 	private var log = LoggerFactory.getLogger(UserService::class.java)
 
-	private val BCRYPT_PREFIX = "{bcrypt}"
-
 	// --[ LIST ]-------------------------------------------------------------------------------------------------------
 	@Transactional(readOnly = true)
 	fun list(withHistory: Boolean): Set<User> {
 		val now = ZonedDateTime.now()
-		val result: MutableSet<User> = mutableSetOf()
-		result.addAll(userRepository.findByDisabledOnIsNullOrDisabledOnGreaterThanOrderByCreatedOnDesc(now))
+		val result =
+			userRepository.findByDisabledOnIsNullOrDisabledOnGreaterThanOrderByCreatedOnDesc(now).toMutableSet()
 		if (withHistory) {
 			result.addAll(userRepository.findByDisabledOnLessThanEqualOrderByCreatedOnDesc(now))
 		}
@@ -35,7 +34,7 @@ class UserService(private val userRepository: UserRepository) {
 	@Transactional
 	fun create(brandId: UUID, model: User, locale: Locale) {
 		if (model.password.isNotBlank()) {
-			model.password = encryptPassword(model.password)
+			model.password = hashPassword(model.password)
 		}
 		model.lastModified = model.createdOn
 		userRepository.saveAndFlush(model)
@@ -67,10 +66,9 @@ class UserService(private val userRepository: UserRepository) {
 	// --[ UPDATE ]-----------------------------------------------------------------------------------------------------
 	@Transactional
 	fun update(model: User): Boolean {
-		val user = userRepository.findByIdOrNull(model.id)
-
-		if (user != null) {
-			model.roles = user.roles
+		userRepository.findByIdOrNull(model.id)?.let {
+			model.password = it.password
+			model.roles = it.roles
 			model.lastModified = ZonedDateTime.now()
 			userRepository.saveAndFlush(model)
 			return true
@@ -81,12 +79,11 @@ class UserService(private val userRepository: UserRepository) {
 
 	@Transactional
 	fun updatePassword(userId: UUID, newPassword: String): Boolean {
-		val user = userRepository.findByIdOrNull(userId)
-		user?.let {
-			it.password = encryptPassword(newPassword)
-			it.roles = user.roles
+		userRepository.findByIdOrNull(userId)?.let {
+			it.password = hashPassword(newPassword)
+			it.roles = it.roles
 			it.lastModified = ZonedDateTime.now()
-			userRepository.saveAndFlush(user)
+			userRepository.saveAndFlush(it)
 			return true
 		}
 		return false
@@ -95,17 +92,15 @@ class UserService(private val userRepository: UserRepository) {
 	// --[ DELETE ]-----------------------------------------------------------------------------------------------------
 	@Transactional
 	fun deactivate(userId: UUID, since: ZonedDateTime) {
-		val user = userRepository.findByIdOrNull(userId)
-		user?.let {
-			user.disabledOn = since
-			userRepository.saveAndFlush(user)
+		userRepository.findByIdOrNull(userId)?.let {
+			it.disabledOn = since
+			userRepository.saveAndFlush(it)
 		}
 	}
 
 	@Transactional
 	fun activate(brandId: UUID, userId: UUID) {
-		val user = userRepository.findByIdOrNull(userId)
-		user?.let {
+		userRepository.findByIdOrNull(userId)?.let {
 			it.disabledOn = null
 			userRepository.saveAndFlush(it)
 		}
@@ -128,7 +123,7 @@ class UserService(private val userRepository: UserRepository) {
 	}
 
 	// --[ LOGIC ]------------------------------------------------------------------------------------------------------
-	fun encryptPassword(password: String): String {
+	fun hashPassword(password: String): String {
 		return BCRYPT_PREFIX + BCryptPasswordEncoder().encode(password)
 	}
 }
