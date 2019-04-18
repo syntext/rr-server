@@ -10,7 +10,5 @@ enum class UserRoleType : GrantedAuthority {
 	ROLE_TESTER,
 	ROLE_ADMINISTRATOR;
 
-	override fun getAuthority(): String {
-		return name
-	}
+	override fun getAuthority(): String = name
 }

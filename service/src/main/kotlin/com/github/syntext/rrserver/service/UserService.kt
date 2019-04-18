@@ -4,7 +4,7 @@ import com.github.syntext.rrserver.enumeration.UserRoleType
 import com.github.syntext.rrserver.enumeration.UserRoleType.ROLE_AUTHENTICATED
 import com.github.syntext.rrserver.model.User
 import com.github.syntext.rrserver.repository.UserRepository
-import org.slf4j.LoggerFactory
+import mu.KotlinLogging
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Service
@@ -13,17 +13,17 @@ import java.time.ZonedDateTime
 import java.util.*
 
 private const val BCRYPT_PREFIX = "{bcrypt}"
+private val LOG = KotlinLogging.logger {}
 
 @Service
 class UserService(private val userRepository: UserRepository) {
-	private var log = LoggerFactory.getLogger(UserService::class.java)
 
 	// --[ LIST ]-------------------------------------------------------------------------------------------------------
 	@Transactional(readOnly = true)
 	fun list(withHistory: Boolean): Set<User> {
 		val now = ZonedDateTime.now()
-		val result =
-			userRepository.findByDisabledOnIsNullOrDisabledOnGreaterThanOrderByCreatedOnDesc(now).toMutableSet()
+		val result = HashSet<User>()
+		result.addAll(userRepository.findByDisabledOnIsNullOrDisabledOnGreaterThanOrderByCreatedOnDesc(now))
 		if (withHistory) {
 			result.addAll(userRepository.findByDisabledOnLessThanEqualOrderByCreatedOnDesc(now))
 		}
@@ -43,24 +43,16 @@ class UserService(private val userRepository: UserRepository) {
 
 	// --[ READ ]-------------------------------------------------------------------------------------------------------
 	@Transactional(readOnly = true)
-	fun available(email: String): Boolean {
-		return !userRepository.existsByEmail(email)
-	}
+	fun available(email: String): Boolean = !userRepository.existsByEmail(email)
 
 	@Transactional(readOnly = true)
-	fun read(email: String): User? {
-		return userRepository.findByEmail(email)
-	}
+	fun read(email: String): User? = userRepository.findByEmail(email)
 
 	@Transactional(readOnly = true)
-	fun read(id: UUID): User? {
-		return userRepository.findByIdOrNull(id)
-	}
+	fun read(id: UUID): User? = userRepository.findByIdOrNull(id)
 
 	@Transactional(readOnly = true)
-	fun available(email: String, id: UUID): Boolean {
-		return userRepository.existsByEmailAndId(email, id)
-	}
+	fun available(email: String, id: UUID): Boolean = userRepository.existsByEmailAndId(email, id)
 
 
 	// --[ UPDATE ]-----------------------------------------------------------------------------------------------------
@@ -81,7 +73,6 @@ class UserService(private val userRepository: UserRepository) {
 	fun updatePassword(userId: UUID, newPassword: String): Boolean {
 		userRepository.findByIdOrNull(userId)?.let {
 			it.password = hashPassword(newPassword)
-			it.roles = it.roles
 			it.lastModified = ZonedDateTime.now()
 			userRepository.saveAndFlush(it)
 			return true
@@ -107,24 +98,15 @@ class UserService(private val userRepository: UserRepository) {
 	}
 
 	@Transactional
-	fun delete(id: UUID) {
-		userRepository.deleteById(id)
-	}
+	fun delete(id: UUID) = userRepository.deleteById(id)
 
 	// ==[ ROLE ]=======================================================================================================
 	@Transactional
-	fun grant(userId: UUID, role: UserRoleType) {
-		userRepository.grand(userId, role)
-	}
+	fun grant(userId: UUID, role: UserRoleType) = userRepository.grant(userId, role)
 
 	@Transactional
-	fun revoke(userId: UUID, role: UserRoleType) {
-		userRepository.revoke(userId, role)
-	}
+	fun revoke(userId: UUID, role: UserRoleType) = userRepository.revoke(userId, role)
 
 	// --[ LOGIC ]------------------------------------------------------------------------------------------------------
-	fun hashPassword(password: String): String {
-		return BCRYPT_PREFIX + BCryptPasswordEncoder().encode(password)
-	}
+	fun hashPassword(password: String): String = BCRYPT_PREFIX + BCryptPasswordEncoder().encode(password)
 }
-
