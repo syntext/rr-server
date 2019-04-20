@@ -1,4 +1,4 @@
-package com.github.syntext.rrserver.web.api.login.configuration
+package com.github.syntext.rrserver.web.api.configuration
 
 import mu.KotlinLogging
 import org.slf4j.MDC

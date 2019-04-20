@@ -1,4 +1,4 @@
-package com.github.syntext.rrserver.web.api.login.configuration.jwt
+package com.github.syntext.rrserver.web.api.configuration.jwt
 
 import com.github.syntext.rrserver.service.security.authentication.BruteForcePreventionService
 import com.github.syntext.rrserver.service.security.jwt.JwtTokenService
@@ -13,7 +13,10 @@ class JwtTokenFilterConfigurer(
 ) : SecurityConfigurerAdapter<DefaultSecurityFilterChain, HttpSecurity>() {
 
 	override fun configure(http: HttpSecurity) {
-		val customFilter = JwtTokenFilter(jwtTokenService, bruteForcePreventionService)
+		val customFilter = JwtTokenFilter(
+			jwtTokenService,
+			bruteForcePreventionService
+		)
 		http.addFilterBefore(customFilter, UsernamePasswordAuthenticationFilter::class.java)
 	}
 }

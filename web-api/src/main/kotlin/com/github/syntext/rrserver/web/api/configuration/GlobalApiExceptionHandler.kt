@@ -1,4 +1,4 @@
-package com.github.syntext.rrserver.web.api.login.configuration
+package com.github.syntext.rrserver.web.api.configuration
 
 import com.github.syntext.rrserver.service.exception.BadRequestException
 import com.github.syntext.rrserver.service.exception.ForbiddenException

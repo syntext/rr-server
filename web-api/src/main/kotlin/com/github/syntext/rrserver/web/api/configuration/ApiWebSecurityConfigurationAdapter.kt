@@ -1,8 +1,8 @@
-package com.github.syntext.rrserver.web.api.login.configuration
+package com.github.syntext.rrserver.web.api.configuration
 
 import com.github.syntext.rrserver.service.security.authentication.BruteForcePreventionService
 import com.github.syntext.rrserver.service.security.jwt.JwtTokenService
-import com.github.syntext.rrserver.web.api.login.configuration.jwt.JwtTokenFilterConfigurer
+import com.github.syntext.rrserver.web.api.configuration.jwt.JwtTokenFilterConfigurer
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.context.annotation.Bean
