@@ -24,6 +24,7 @@
 			<groupId>io.github.microutils</groupId>
 			<artifactId>kotlin-logging</artifactId>
 		</dependency>
+
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-api</artifactId>
@@ -59,11 +60,6 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>io.github.microutils</groupId>
-			<artifactId>kotlin-logging</artifactId>
 		</dependency>
 	</dependencies>
 
