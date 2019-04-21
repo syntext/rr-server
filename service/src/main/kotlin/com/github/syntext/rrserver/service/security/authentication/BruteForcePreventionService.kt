@@ -19,10 +19,7 @@ class BruteForcePreventionService {
 		.maximumSize(100)
 		.build()
 
-	fun getIp(request: HttpServletRequest): String {
-		val ipAddress = request.getHeader("X-FORWARDED-FOR")
-		return ipAddress?.let { it } ?: request.remoteAddr
-	}
+	fun getIp(request: HttpServletRequest): String = request.getHeader("X-FORWARDED-FOR") ?: request.remoteAddr
 
 	fun loginSucceeded(key: String) {
 		LOG.trace { "loginSucceeded [$key]" }
@@ -31,19 +28,15 @@ class BruteForcePreventionService {
 
 	fun loginFailed(key: String) {
 		LOG.trace { "loginFailed [$key]" }
-		var attempt = attempts.getIfPresent(key)
-		if (attempt == null) {
-			attempt = 0
-		}
+		var attempt = attempts.getIfPresent(key) ?: 0
 		attempt++
 		attempts.put(key, attempt)
 	}
 
 	fun isBlocked(key: String): Boolean {
 		var result = false
-		val attempts = attempts.getIfPresent(key)
-		if (attempts != null) {
-			result = attempts >= MAX_ATTEMPT
+		attempts.getIfPresent(key)?.let {
+			result = it >= MAX_ATTEMPT
 		}
 		LOG.trace { "isBlocked [$key]: $result" }
 		return result
