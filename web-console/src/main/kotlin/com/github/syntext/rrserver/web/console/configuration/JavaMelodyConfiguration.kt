@@ -22,16 +22,18 @@ class JavaMelodyConfiguration {
 	@Bean
 	fun javaMelody(): FilterRegistrationBean<MonitoringFilter> {
 		val javaMelody = FilterRegistrationBean<MonitoringFilter>()
-		javaMelody.filter = MonitoringFilter()
-		javaMelody.setName("javamelody")
-		javaMelody.setDispatcherTypes(DispatcherType.REQUEST, DispatcherType.ASYNC)
-		javaMelody.addInitParameter(Parameter.LOG.code, java.lang.Boolean.toString(true))
-		javaMelody.addInitParameter(
-			Parameter.QUARTZ_DEFAULT_LISTENER_DISABLED.code,
-			java.lang.Boolean.toString(true)
-		)
-		javaMelody.addInitParameter(Parameter.MONITORING_PATH.code, "/console/javamelody")
-		javaMelody.addUrlPatterns("/*")
+		javaMelody.run {
+			filter = MonitoringFilter()
+			setName("javamelody")
+			setDispatcherTypes(DispatcherType.REQUEST, DispatcherType.ASYNC)
+			addInitParameter(Parameter.LOG.code, java.lang.Boolean.toString(true))
+			addInitParameter(
+				Parameter.QUARTZ_DEFAULT_LISTENER_DISABLED.code,
+				java.lang.Boolean.toString(true)
+			)
+			addInitParameter(Parameter.MONITORING_PATH.code, "/console/javamelody")
+			addUrlPatterns("/*")
+		}
 		return javaMelody
 	}
 
