@@ -2,9 +2,7 @@ package com.github.syntext.rrserver.service.security.authentication
 
 import com.github.benmanes.caffeine.cache.Cache
 import com.github.benmanes.caffeine.cache.Caffeine
-import jdk.nashorn.internal.runtime.regexp.joni.Config.log
 import mu.KotlinLogging
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.concurrent.TimeUnit
 import javax.servlet.http.HttpServletRequest
