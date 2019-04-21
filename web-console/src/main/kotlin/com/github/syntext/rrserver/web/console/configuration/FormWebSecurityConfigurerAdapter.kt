@@ -1,6 +1,7 @@
 package com.github.syntext.rrserver.web.console.configuration
 
-import com.github.syntext.rrserver.web.console.configuration.authentication.AuthenticationFailureHandler
+import com.github.syntext.rrserver.service.security.authentication.BruteForcePreventionService
+import com.github.syntext.rrserver.web.console.configuration.authentication.CustomAuthenticationFailureHandler
 import com.github.syntext.rrserver.web.console.configuration.authentication.CustomAuthenticationSuccessHandler
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationEventPublisher
@@ -23,14 +24,18 @@ import javax.sql.DataSource
 @Order(2)
 @Configuration
 class FormWebSecurityConfigurerAdapter : WebSecurityConfigurerAdapter() {
-
-	private val FAILURE_URL = "/login?error"
-	private val QUERY_USERNAME =
-		"select ID, PASSWORD, case when DISABLED_ON is null then 'true' else 'false' end " + "as ENABLED from USERS where EMAIL=?"
-	private val QUERY_AUTHORITIES = "select USER_ID as ID, AUTHORITY from USER_ROLES where USER_ID=?::uuid"
+	companion object {
+		private const val FAILURE_URL = "/login?error"
+		private const val QUERY_USERNAME =
+			"select ID, PASSWORD, case when DISABLED_ON is null then 'true' else 'false' end " + "as ENABLED from USERS where EMAIL=?"
+		private const val QUERY_AUTHORITIES = "select USER_ID as ID, AUTHORITY from USER_ROLES where USER_ID=?::uuid"
+	}
 
 	@Autowired
-	lateinit var dataSource: DataSource
+	private lateinit var dataSource: DataSource
+
+	@Autowired
+	private lateinit var bruteForcePreventionService: BruteForcePreventionService
 
 	@Autowired
 	fun configureGlobal(auth: AuthenticationManagerBuilder) {
@@ -73,15 +78,12 @@ class FormWebSecurityConfigurerAdapter : WebSecurityConfigurerAdapter() {
 
 	@Bean
 	fun authenticationSuccessHandler(): CustomAuthenticationSuccessHandler {
-		val bean = CustomAuthenticationSuccessHandler()
-		// NOTE: this must by the same as in the login form. this will trigger after the correct password is entered!
-		bean.failureUrl(FAILURE_URL)
-		return bean
+		return CustomAuthenticationSuccessHandler(bruteForcePreventionService, FAILURE_URL)
 	}
 
 	@Bean
-	fun authenticationFailureHandler(): AuthenticationFailureHandler {
-		return AuthenticationFailureHandler(FAILURE_URL)
+	fun authenticationFailureHandler(): CustomAuthenticationFailureHandler {
+		return CustomAuthenticationFailureHandler(bruteForcePreventionService, FAILURE_URL)
 	}
 
 	@Bean

@@ -12,12 +12,10 @@ import javax.servlet.http.HttpServletResponse
 
 private val log = KotlinLogging.logger {}
 
-@Component
-class CustomAuthenticationSuccessHandler : SavedRequestAwareAuthenticationSuccessHandler() {
-
-	@Autowired
-	lateinit var bruteForcePreventionService: BruteForcePreventionService
-	lateinit var failureUrl: String
+class CustomAuthenticationSuccessHandler(
+	private val bruteForcePreventionService: BruteForcePreventionService,
+	private val failureUrl: String
+) : SavedRequestAwareAuthenticationSuccessHandler() {
 
 	override fun onAuthenticationSuccess(
 		request: HttpServletRequest,
@@ -41,9 +39,5 @@ class CustomAuthenticationSuccessHandler : SavedRequestAwareAuthenticationSucces
 
 		bruteForcePreventionService.loginSucceeded(ip)
 		super.onAuthenticationSuccess(request, response, authentication)
-	}
-
-	fun failureUrl(url: String) {
-		this.failureUrl = url
 	}
 }

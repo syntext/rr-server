@@ -9,6 +9,7 @@ import java.util.*
 import javax.persistence.*
 import javax.persistence.EnumType.STRING
 import javax.persistence.FetchType.EAGER
+import kotlin.collections.HashSet
 
 @Entity
 @Table(name = "USERS")
@@ -42,5 +43,5 @@ data class User(
 	@CollectionTable(name = "MEMBER_ROLES", joinColumns = [JoinColumn(name = "MEMBER_ID")])
 	@Column(name = "AUTHORITY")
 	@Enumerated(STRING)
-	var roles: Set<UserRoleType>
+	var roles: MutableSet<UserRoleType>
 )

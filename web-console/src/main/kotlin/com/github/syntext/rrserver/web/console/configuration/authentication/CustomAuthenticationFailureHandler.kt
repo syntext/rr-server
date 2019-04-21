@@ -8,12 +8,11 @@ import org.springframework.stereotype.Component
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
-@Component
-class AuthenticationFailureHandler(defaultFailureUrl: String) :
+class CustomAuthenticationFailureHandler(
+	private val bruteForcePreventionService: BruteForcePreventionService,
+	defaultFailureUrl: String
+) :
 	SimpleUrlAuthenticationFailureHandler(defaultFailureUrl) {
-
-	@Autowired
-	lateinit var bruteForcePreventionService: BruteForcePreventionService
 
 	override fun onAuthenticationFailure(
 		request: HttpServletRequest,

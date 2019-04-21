@@ -26,9 +26,9 @@ private const val HTTP_AUTHENTICATION_SCHEME_LENGTH = HTTP_AUTHENTICATION_SCHEME
 
 @Service
 class JwtTokenService(
-	val userRepository: UserRepository,
-	val passwordEncoder: PasswordEncoder,
-	@Value("#{jwt.secret.key}") val secretKeyString: String
+	private val userRepository: UserRepository,
+	private val passwordEncoder: PasswordEncoder,
+	@Value("\${jwt.secret.key}") private val secretKeyString: String
 ) {
 	private val secretKey = Keys.hmacShaKeyFor(secretKeyString.toByteArray())
 
