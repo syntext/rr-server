@@ -46,20 +46,17 @@ class JwtTokenFilter(
 		}
 
 		val token = jwtTokenService.resolveToken(httpServletRequest)
-		token?.let {
-			try {
-				if (token.isNotBlank() && jwtTokenService.validateToken(token)) {
-					SecurityContextHolder.getContext().authentication = jwtTokenService.getAuthentication(token)
-					bruteForcePreventionService.loginSucceeded(ip)
-					filterChain.doFilter(httpServletRequest, httpServletResponse)
-				}
-			} catch (ue: UnauthorizedException) {
-				SecurityContextHolder.clearContext()
-				bruteForcePreventionService.loginFailed(ip)
-				httpServletResponse.sendError(ue.getHttpStatus().value(), ue.message)
+		try {
+			if (jwtTokenService.validateToken(token)) {
+				SecurityContextHolder.getContext().authentication = jwtTokenService.getAuthentication(token)
+				bruteForcePreventionService.loginSucceeded(ip)
+				filterChain.doFilter(httpServletRequest, httpServletResponse)
 			}
+		} catch (ue: UnauthorizedException) {
+			SecurityContextHolder.clearContext()
+			bruteForcePreventionService.loginFailed(ip)
+			httpServletResponse.sendError(ue.getHttpStatus().value(), ue.message)
 		}
-		return
 	}
 }
 

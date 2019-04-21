@@ -38,7 +38,7 @@ class ApiWebSecurityConfigurationAdapter : WebSecurityConfigurerAdapter() {
 		http
 			.antMatcher("/api/**")
 			.authorizeRequests()
-			.antMatchers("/api/login/**").permitAll()
+			.antMatchers("/api/login").permitAll()
 			.antMatchers("/api/**").authenticated()
 
 		// Apply JWT

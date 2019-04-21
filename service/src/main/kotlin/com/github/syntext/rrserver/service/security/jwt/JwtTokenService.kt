@@ -66,12 +66,11 @@ class JwtTokenService(
 		}
 	}
 
-	// fixme: don't do null return types
-	fun resolveToken(req: HttpServletRequest): String? {
-		val bearerToken = req.getHeader(HTTP_AUTHENTICATION_HEADER)
+	fun resolveToken(req: HttpServletRequest): String {
+		val bearerToken = req.getHeader(HTTP_AUTHENTICATION_HEADER) ?: ""
 		return if (bearerToken.isNotBlank() && bearerToken.startsWith(HTTP_AUTHENTICATION_SCHEME)) {
 			bearerToken.substring(HTTP_AUTHENTICATION_SCHEME_LENGTH)
-		} else null
+		} else ""
 	}
 
 	fun validateToken(token: String): Boolean {
