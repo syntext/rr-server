@@ -30,3 +30,6 @@ database/changelog/generateChangeLog.xml
 
 # Enviroments tools
 lib/
+
+# Docker
+docker/.env

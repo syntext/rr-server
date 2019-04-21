@@ -37,18 +37,22 @@
 		<!-- create database -->
 		<exec dir="${environment.home}/pgsql/bin" executable="/bin/sh">
 			<arg value="-c"/>
-			<arg value="./initdb -D ${environment.home}/pgsql/data -E UTF8"/>
+			<arg value="./initdb -D ${environment.home}/pgsql/data -E UTF8 -U postgres"/>
 		</exec>
 
 		<!-- start database -->
 		<antcall target="postgresql.start"/>
 		<sleep seconds="3"/>
 
+		<antcall target="postgresql.setup"/>
+	</target>
+
+	<target name="postgresql.setup" description="Set up PostgreSQL database and user">
 		<!-- import database schema -->
 		<echo message="Start PostgreSQL import"/>
 		<exec dir="${environment.home}/pgsql/bin" executable="/bin/sh">
 			<arg value="-c"/>
-			<arg value="./psql -d postgres -a -f ${basedir}/database/setup.sql"/>
+			<arg value="./psql -h ${postgresql.host} -p ${postgresql.port} -U postgres -d postgres -a -f ${basedir}/database/setup.sql"/>
 		</exec>
 	</target>
 
@@ -85,7 +89,7 @@
 
 		<exec dir="${environment.home}/pgsql/bin" executable="/bin/sh">
 			<arg value="-c"/>
-			<arg value="./pg_dump ${postgresql.database} | 7z a -si -v10m ${basedir}/database/dump/${postgresql.database}.7z"/>
+			<arg value="./pg_dump -h ${postgresql.host} -p ${postgresql.port} -U ${postgresql.username} ${postgresql.database} | 7z a -si -v10m ${basedir}/database/dump/${postgresql.database}.7z"/>
 		</exec>
 	</target>
 
@@ -101,21 +105,21 @@
 		<exec dir="${environment.home}/pgsql/bin" executable="/bin/sh">
 			<arg value="-c"/>
 			<arg
-				value="./pg_dump --data-only ${postgresql.database} | 7z a -si -v10m ${basedir}/database/dump/${postgresql.database}-data-only.7z"/>
+				value="./pg_dump -h ${postgresql.host} -p ${postgresql.port} -U postgres --data-only ${postgresql.database} | 7z a -si -v10m ${basedir}/database/dump/${postgresql.database}-data-only.7z"/>
 		</exec>
 	</target>
 
 	<target name="postgresql.restore" description="Restore PostgreSQL database">
 		<exec dir="${environment.home}/pgsql/bin" executable="/bin/sh">
 			<arg value="-c"/>
-			<arg value="7z e -so ${basedir}/database/dump/${postgresql.database}.7z.001 | ./psql ${postgresql.database}"/>
+			<arg value="7z e -so ${basedir}/database/dump/${postgresql.database}.7z.001 | ./psql -h ${postgresql.host} -p ${postgresql.port} -U ${postgresql.username} ${postgresql.database}"/>
 		</exec>
 	</target>
 
 	<target name="postgresql.restore.backup" description="Restore PostgreSQL database">
 		<exec dir="${environment.home}/pgsql/bin" executable="/bin/sh">
 			<arg value="-c"/>
-			<arg value="7z e -so ${basedir}/database/dump/*.7z | ./psql ${postgresql.database}"/>
+			<arg value="7z e -so ${basedir}/database/dump/*.7z | ./psql -h ${postgresql.host} -p ${postgresql.port} -U ${postgresql.username} ${postgresql.database}"/>
 		</exec>
 	</target>
 
@@ -123,7 +127,7 @@
 		<exec dir="${environment.home}/pgsql/bin" executable="/bin/sh">
 			<arg value="-c"/>
 			<arg
-				value="7z e -so ${basedir}/database/dump/${postgresql.database}-data-only.7z.001 | ./psql ${postgresql.database}"/>
+				value="7z e -so ${basedir}/database/dump/${postgresql.database}-data-only.7z.001 | ./psql -h ${postgresql.host} -p ${postgresql.port} -U ${postgresql.username} ${postgresql.database}"/>
 		</exec>
 	</target>
 
@@ -253,6 +257,33 @@
 			<arg value="-c"/>
 			<arg
 				value="java -jar ${environment.home}/fakesmtp/fakesmtp-${fakesmtp.version}.jar -s -p ${fakesmtp.port} -o ${environment.home}/fakesmtp/emails"/>
+		</exec>
+	</target>
+
+	<!-- ==[ DOCKER ]=============================================================================================== -->
+
+	<target name="docker.compose.init" description="Initialise docker containers">
+		<exec dir="docker/" executable="docker-compose">
+			<arg value="up"/>
+			<arg value="-d"/>
+		</exec>
+	</target>
+
+	<target name="docker.compose.kill" description="Kill docker containers">
+		<exec dir="docker/" executable="docker-compose">
+			<arg value="down"/>
+		</exec>
+	</target>
+
+	<target name="docker.compose.stop" description="Stop docker containers">
+		<exec dir="docker/" executable="docker-compose">
+			<arg value="stop"/>
+		</exec>
+	</target>
+
+	<target name="docker.compose.start" description="Start docker containers">
+		<exec dir="docker/" executable="docker-compose">
+			<arg value="start"/>
 		</exec>
 	</target>
 

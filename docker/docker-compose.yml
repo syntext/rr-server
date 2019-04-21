@@ -1,0 +1,23 @@
+version: '3.5'
+services:
+  postgres:
+    image: ${COMPOSE_PROJECT_NAME}-postgres:${POSTGRESQL_VERSION}
+    container_name: ${COMPOSE_PROJECT_NAME}-postgres
+    build:
+      context: ./postgres
+      args:
+        version: ${POSTGRESQL_VERSION}
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+    ports:
+      - "5432:5432"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    name: dev-network
+    driver: bridge
+
+# vim: ai ts=2 sw=2 expandtab
