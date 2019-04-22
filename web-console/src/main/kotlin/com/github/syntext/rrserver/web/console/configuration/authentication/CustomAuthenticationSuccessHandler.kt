@@ -10,12 +10,13 @@ import org.springframework.stereotype.Component
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
-private val log = KotlinLogging.logger {}
-
 class CustomAuthenticationSuccessHandler(
 	private val bruteForcePreventionService: BruteForcePreventionService,
 	private val failureUrl: String
 ) : SavedRequestAwareAuthenticationSuccessHandler() {
+	companion object {
+		private val LOG = KotlinLogging.logger {}
+	}
 
 	override fun onAuthenticationSuccess(
 		request: HttpServletRequest,

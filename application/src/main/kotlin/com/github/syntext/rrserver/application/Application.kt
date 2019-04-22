@@ -8,6 +8,6 @@ import java.util.*
 class Application
 
 fun main(args: Array<String>) {
-	TimeZone.setDefault(TimeZone.getTimeZone("Europe/Amsterdam"))
+	TimeZone.setDefault(TimeZone.getTimeZone("UTC"))
 	runApplication<Application>(*args)
 }

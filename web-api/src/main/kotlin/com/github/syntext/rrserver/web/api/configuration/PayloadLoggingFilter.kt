@@ -12,11 +12,12 @@ import javax.servlet.ServletException
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
-private val log = KotlinLogging.logger {}
-
 class PayloadLoggingFilter : OncePerRequestFilter() {
-	private val KEY_SESSION_ID = "sessionId"
-	private val KEY_RESPONSE_TIME = "responseTime"
+	companion object {
+		private val LOG = KotlinLogging.logger {}
+		private const val KEY_SESSION_ID = "sessionId"
+		private const val KEY_RESPONSE_TIME = "responseTime"
+	}
 
 	@Throws(ServletException::class, IOException::class)
 	override fun doFilterInternal(
@@ -34,7 +35,7 @@ class PayloadLoggingFilter : OncePerRequestFilter() {
 		} finally {
 			val duration = (System.currentTimeMillis() - startTime).toString()
 			MDC.put(KEY_RESPONSE_TIME, duration)
-			log.info("Call duration {} ms for: {}", duration, createLogLine(requestWrapper, responseWrapper))
+			LOG.info("Call duration {} ms for: {}", duration, createLogLine(requestWrapper, responseWrapper))
 			MDC.clear()
 
 			// Do not forget this line after reading response content or actual response will be empty!

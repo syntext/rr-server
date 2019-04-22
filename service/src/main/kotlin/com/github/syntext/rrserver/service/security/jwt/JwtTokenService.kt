@@ -7,6 +7,7 @@ import com.github.syntext.rrserver.service.exception.UnauthorizedException
 import io.jsonwebtoken.JwtException
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Keys
+import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
@@ -19,17 +20,20 @@ import java.util.*
 import javax.servlet.http.HttpServletRequest
 import kotlin.collections.ArrayList
 
-private const val CLAIM_KEY = "auth"
-private const val HTTP_AUTHENTICATION_HEADER = "Authorization"
-private const val HTTP_AUTHENTICATION_SCHEME = "Bearer "
-private const val HTTP_AUTHENTICATION_SCHEME_LENGTH = HTTP_AUTHENTICATION_SCHEME.length
-
 @Service
 class JwtTokenService(
 	private val userRepository: UserRepository,
 	private val passwordEncoder: PasswordEncoder,
 	@Value("\${jwt.secret.key}") private val secretKeyString: String
 ) {
+	companion object {
+		private val LOG = KotlinLogging.logger {}
+		private const val CLAIM_KEY = "auth"
+		private const val HTTP_AUTHENTICATION_HEADER = "Authorization"
+		private const val HTTP_AUTHENTICATION_SCHEME = "Bearer "
+		private const val HTTP_AUTHENTICATION_SCHEME_LENGTH = HTTP_AUTHENTICATION_SCHEME.length
+	}
+
 	private val secretKey = Keys.hmacShaKeyFor(secretKeyString.toByteArray())
 
 	fun doRefresh(): String? {

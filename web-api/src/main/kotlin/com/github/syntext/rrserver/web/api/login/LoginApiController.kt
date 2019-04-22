@@ -4,7 +4,7 @@ import com.github.syntext.rrserver.service.exception.BadRequestException
 import com.github.syntext.rrserver.service.exception.UnauthorizedException
 import com.github.syntext.rrserver.service.security.authentication.BruteForcePreventionService
 import com.github.syntext.rrserver.service.security.jwt.JwtTokenService
-import org.slf4j.LoggerFactory
+import mu.KotlinLogging
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
 import javax.servlet.http.HttpServletRequest
@@ -12,19 +12,24 @@ import javax.servlet.http.HttpServletRequest
 
 @RequestMapping("/api/login")
 @RestController
-class LoginApiController(val jwtTokenService: JwtTokenService,
-						 val bruteForcePreventionService: BruteForcePreventionService) {
-
-	private val log = LoggerFactory.getLogger(LoginApiController::class.java)
+class LoginApiController(
+	val jwtTokenService: JwtTokenService,
+	val bruteForcePreventionService: BruteForcePreventionService
+) {
+	companion object {
+		private val LOG = KotlinLogging.logger {}
+	}
 
 	@PostMapping
-	fun login(@RequestBody model: AuthenticationModel,
-			  request: HttpServletRequest): TokenModel {
+	fun login(
+		@RequestBody model: AuthenticationModel,
+		request: HttpServletRequest
+	): TokenModel {
 
 		val ip = bruteForcePreventionService.getIp(request)
 		if (isBlocked(bruteForcePreventionService.getIp(request), request)) {
 			SecurityContextHolder.clearContext()
-			log.info("IP blocked: {}", ip)
+			LOG.info {"IP blocked: $ip"}
 			throw UnauthorizedException("IP blocked: $ip")
 		}
 
@@ -52,7 +57,7 @@ class LoginApiController(val jwtTokenService: JwtTokenService,
 			// Logout user
 			request.logout()
 
-			// Cleanup inlog info
+			// Cleanup login info
 			SecurityContextHolder.clearContext()
 			val session = request.getSession(false)
 			session?.invalidate()

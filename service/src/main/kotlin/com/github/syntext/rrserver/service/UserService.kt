@@ -12,11 +12,12 @@ import org.springframework.transaction.annotation.Transactional
 import java.time.ZonedDateTime
 import java.util.*
 
-private const val BCRYPT_PREFIX = "{bcrypt}"
-private val LOG = KotlinLogging.logger {}
-
 @Service
 class UserService(private val userRepository: UserRepository) {
+	companion object {
+		private const val BCRYPT_PREFIX = "{bcrypt}"
+		private val LOG = KotlinLogging.logger {}
+	}
 
 	// --[ LIST ]-------------------------------------------------------------------------------------------------------
 	@Transactional(readOnly = true)

@@ -11,12 +11,13 @@ import javax.servlet.FilterChain
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
-private val log = KotlinLogging.logger {}
-
 class JwtTokenFilter(
 	private val jwtTokenService: JwtTokenService,
 	private val bruteForcePreventionService: BruteForcePreventionService
 ) : OncePerRequestFilter() {
+	companion object {
+		private val LOG = KotlinLogging.logger {}
+	}
 
 	private fun isBlocked(ip: String, request: HttpServletRequest): Boolean {
 		if (bruteForcePreventionService.isBlocked(ip)) {
@@ -40,7 +41,7 @@ class JwtTokenFilter(
 		val ip = bruteForcePreventionService.getIp(httpServletRequest)
 		if (isBlocked(bruteForcePreventionService.getIp(httpServletRequest), httpServletRequest)) {
 			SecurityContextHolder.clearContext()
-			log.info("IP blocked: {}", ip)
+			LOG.info("IP blocked: {}", ip)
 			httpServletResponse.sendError(HttpStatus.UNAUTHORIZED.value(), "IP blocked")
 			return
 		}

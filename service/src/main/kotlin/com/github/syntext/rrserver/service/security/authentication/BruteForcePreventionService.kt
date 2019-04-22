@@ -7,11 +7,13 @@ import org.springframework.stereotype.Service
 import java.util.concurrent.TimeUnit
 import javax.servlet.http.HttpServletRequest
 
-private val LOG = KotlinLogging.logger {}
-private const val MAX_ATTEMPT = 15
-
 @Service
 class BruteForcePreventionService {
+	companion object {
+		private val LOG = KotlinLogging.logger {}
+		private const val MAX_ATTEMPT = 15
+	}
+
 	val attempts: Cache<String, Int> = Caffeine.newBuilder()
 		.expireAfterWrite(1, TimeUnit.DAYS)
 		.maximumSize(100)
