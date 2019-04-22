@@ -1,7 +1,7 @@
-package com.github.syntext.rrserver.web.api.com.github.syntext.rrserver.web.api.service
+package com.github.syntext.rrserver.web.api.service
 
 import com.github.syntext.rrserver.service.UserService
-import com.github.syntext.rrserver.web.api.com.github.syntext.rrserver.web.api.model.UserModel
+import com.github.syntext.rrserver.web.api.model.UserModel
 import io.leangen.graphql.annotations.GraphQLArgument
 import io.leangen.graphql.annotations.GraphQLMutation
 import io.leangen.graphql.annotations.GraphQLQuery
@@ -12,20 +12,18 @@ import java.util.*
 @Service
 class UserApiService(val userService: UserService) {
 
-	@GraphQLQuery(name = "member")
+	@GraphQLQuery(name = "user")
 	fun read(): UserModel {
-		val memberId = UUID.fromString(getContext().getAuthentication().getName())
-		return UserModel(userService.read(memberId))
+		val userId = UUID.fromString(getContext().authentication.name)
+		return UserModel(userService.read(userId))
 	}
 
 	@GraphQLMutation(name = "save")
-	fun save(@GraphQLArgument(name = "member") source: UserModel): UserModel {
-		val memberId = UUID.fromString(getContext().authentication.name)
-		val destination = userService.read(memberId)
-		destination?.let {
-			source.update(destination)
-			userService.update(destination)
-		}
+	fun save(@GraphQLArgument(name = "user") source: UserModel): UserModel {
+		val userId = UUID.fromString(getContext().authentication.name)
+		val destination = userService.read(userId) ?: throw Exception("Illegal userId in authentication context")
+		source.update(destination)
+		userService.update(destination)
 		return UserModel(destination)
 	}
 }

@@ -1,4 +1,4 @@
-package com.github.syntext.rrserver.web.api.com.github.syntext.rrserver.web.api.model
+package com.github.syntext.rrserver.web.api.model
 
 import com.github.syntext.rrserver.enumeration.GenderType
 import com.github.syntext.rrserver.model.User
