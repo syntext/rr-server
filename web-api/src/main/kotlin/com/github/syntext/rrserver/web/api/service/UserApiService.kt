@@ -21,7 +21,8 @@ class UserApiService(val userService: UserService) {
 	@GraphQLMutation(name = "save")
 	fun save(@GraphQLArgument(name = "user") source: UserModel): UserModel {
 		val userId = UUID.fromString(getContext().authentication.name)
-		val destination = userService.read(userId) ?: throw Exception("Illegal userId in authentication context")
+		val destination = userService.read(userId)
+			?: throw IllegalStateException("Illegal userId in authentication context")
 		source.update(destination)
 		userService.update(destination)
 		return UserModel(destination)
