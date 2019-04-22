@@ -40,7 +40,7 @@ data class User(
 	var disabledOn: ZonedDateTime?,
 
 	@ElementCollection(fetch = EAGER)
-	@CollectionTable(name = "MEMBER_ROLES", joinColumns = [JoinColumn(name = "MEMBER_ID")])
+	@CollectionTable(name = "USER_ROLES", joinColumns = [JoinColumn(name = "USER_ID")])
 	@Column(name = "AUTHORITY")
 	@Enumerated(STRING)
 	var roles: MutableSet<UserRoleType>
