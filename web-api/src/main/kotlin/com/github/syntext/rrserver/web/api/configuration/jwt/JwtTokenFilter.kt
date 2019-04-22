@@ -23,7 +23,7 @@ class JwtTokenFilter(
 			// Logout user
 			request.logout()
 
-			// Cleanup inlog info
+			// Cleanup login info
 			SecurityContextHolder.clearContext()
 			val session = request.getSession(false)
 			session?.invalidate()

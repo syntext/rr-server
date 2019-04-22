@@ -1,6 +1,5 @@
-package com.github.syntext.rrserver.web.api.com.github.syntext.rrserver.web.api
+package com.github.syntext.rrserver.web.api
 
-import com.github.syntext.rrserver.web.api.GraphQLRequestBody
 import graphql.ExecutionInput
 import graphql.GraphQL
 import graphql.Internal
