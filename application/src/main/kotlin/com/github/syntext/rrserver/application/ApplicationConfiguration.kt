@@ -13,6 +13,6 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 @EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true)
 @Configuration
 @ComponentScan("com.github.syntext.rrserver")
-@EnableJpaRepositories("com.github.syntext.rrserver.repository")
 @EntityScan("com.github.syntext.rrserver.model")
+@EnableJpaRepositories("com.github.syntext.rrserver.repository")
 class ApplicationConfiguration
