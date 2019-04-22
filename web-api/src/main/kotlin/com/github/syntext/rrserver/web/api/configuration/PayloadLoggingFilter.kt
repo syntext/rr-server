@@ -49,7 +49,7 @@ class PayloadLoggingFilter : OncePerRequestFilter() {
 		val line = StringBuilder()
 		line.append(requestWrapper.requestURL.toString())
 
-		val queryString = requestWrapper.queryString
+		val queryString = requestWrapper.queryString ?: ""
 		if (queryString.isNotBlank()) {
 			line.append(":")
 			line.append(queryString)
