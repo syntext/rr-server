@@ -5,6 +5,17 @@
 
 	<changeSet id="data-1" author="Ron Lievens">
 
+		<insert tableName="locations">
+			<column name="id" value="41ab34c7-7f8f-485c-9566-777662f53e80"/>
+			<column name="location_name" value="East"/>
+		</insert>
+
+		<insert tableName="departments">
+			<column name="id" value="943e84f1-6cb4-4f09-a1f4-d00bf830e61e"/>
+			<column name="department_name" value="IT"/>
+			<column name="location_id" value="41ab34c7-7f8f-485c-9566-777662f53e80"/>
+		</insert>
+
 		<!-- PASSWORD = qwerty12345 -->
 		<insert tableName="users">
 			<column name="id" value="8eba47b6-04a2-4a07-9d2e-b7c19f41b17e"/>
@@ -15,6 +26,7 @@
 			<column name="password" value="{bcrypt}$2a$10$VyepEEPWb7AnMgcEdEmqOensV6lF4rkNeCaOcgOquBaMLHUKyg8eW"/>
 			<column name="date_of_birth" value="1966-07-08 00:00:00"/>
 			<column name="gender" value="MALE"/>
+			<column name="department_id" value="943e84f1-6cb4-4f09-a1f4-d00bf830e61e"/>
 			<column name="created_on" value="2019-01-01 00:00:00"/>
 		</insert>
 		<insert tableName="user_roles">
@@ -32,6 +44,7 @@
 			<column name="password" value="{bcrypt}$2a$10$VyepEEPWb7AnMgcEdEmqOensV6lF4rkNeCaOcgOquBaMLHUKyg8eW"/>
 			<column name="date_of_birth" value="1977-08-07 00:00:00"/>
 			<column name="gender" value="FEMALE"/>
+			<column name="department_id" value="943e84f1-6cb4-4f09-a1f4-d00bf830e61e"/>
 			<column name="created_on" value="2019-01-01 00:00:00"/>
 		</insert>
 		<insert tableName="user_roles">

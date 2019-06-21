@@ -4,8 +4,10 @@ import com.github.syntext.rrserver.enumeration.GenderType
 import com.github.syntext.rrserver.model.User
 import org.springframework.beans.BeanUtils
 import java.time.LocalDate
+import java.util.*
 
 data class UserModel(
+	var id: UUID,
 	var firstName: String,
 	var infix: String?,
 	var lastName: String,
@@ -13,7 +15,7 @@ data class UserModel(
 	var dateOfBirth: LocalDate?,
 	var gender: GenderType?
 ) {
-	constructor() : this("", null, "", "", null, null)
+	constructor() : this(UUID.randomUUID(), "", null, "", "", null, null)
 
 	constructor(source: User?): this() {
 		source?.let {
