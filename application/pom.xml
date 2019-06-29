@@ -87,7 +87,7 @@
 					</execution>
 				</executions>
 				<configuration>
-					<mainClass>com.github.syntext.rrserver.application.Application</mainClass>
+					<mainClass>com.github.syntext.rrserver.application.ApplicationKt</mainClass>
 				</configuration>
 			</plugin>
 		</plugins>
